@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export type ElementType = "text" | "shape" | "image";
@@ -19,6 +18,7 @@ export interface DesignElement {
   stroke?: string;
   strokeWidth?: number;
   shapeType?: "rect" | "circle" | "ellipse" | "line" | "triangle";
+  align?: "left" | "center" | "right";
 }
 
 export interface Design {
@@ -60,7 +60,6 @@ interface DesignProviderProps {
   children: ReactNode;
 }
 
-// Sample template designs
 const sampleDesigns: Design[] = [
   {
     id: "template-1",
@@ -216,30 +215,25 @@ export const DesignProvider = ({ children }: DesignProviderProps) => {
   };
 
   const addRecentDesign = (design: Design) => {
-    // Check if the design already exists in recent designs
     const existingIndex = recentDesigns.findIndex((d) => d.id === design.id);
 
     if (existingIndex !== -1) {
-      // Update existing design
       const updatedRecentDesigns = [...recentDesigns];
       updatedRecentDesigns[existingIndex] = design;
       setRecentDesigns(updatedRecentDesigns);
     } else {
-      // Add new design
-      setRecentDesigns([design, ...recentDesigns].slice(0, 10)); // Keep only 10 recent designs
+      setRecentDesigns([design, ...recentDesigns].slice(0, 10));
     }
   };
 
   const saveDesign = () => {
     if (!currentDesign) return;
     
-    // Update the design in the recent designs list
     addRecentDesign({
       ...currentDesign,
       updatedAt: new Date(),
     });
     
-    // TODO: In a real app, we would send this to a backend API
     console.log("Design saved:", currentDesign);
   };
 
