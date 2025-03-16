@@ -11,10 +11,10 @@ import { toast } from "sonner";
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, updateProfile, isAuthenticated, logout } = useUser();
-  const [name, setName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [bio, setBio] = useState(user?.bio || "");
+  const { currentUser, updateUser, isAuthenticated, logout } = useUser();
+  const [name, setName] = useState(currentUser?.name || "");
+  const [email, setEmail] = useState(currentUser?.email || "");
+  const [bio, setBio] = useState(currentUser?.bio || "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +30,7 @@ const Profile = () => {
     setIsLoading(true);
 
     try {
-      await updateProfile({ name, email, bio });
+      await updateUser({ name, email, bio });
       toast.success("Profile updated successfully");
     } catch (error) {
       toast.error("Failed to update profile");
@@ -81,12 +81,12 @@ const Profile = () => {
           <CardContent>
             <div className="flex flex-col items-center">
               <div className="w-24 h-24 bg-brand-purple text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">
-                {user?.name?.charAt(0) || "U"}
+                {currentUser?.name?.charAt(0) || "U"}
               </div>
-              <h3 className="font-medium text-lg">{user?.name || "User"}</h3>
-              <p className="text-sm text-gray-500">{user?.email || "user@example.com"}</p>
+              <h3 className="font-medium text-lg">{currentUser?.name || "User"}</h3>
+              <p className="text-sm text-gray-500">{currentUser?.email || "user@example.com"}</p>
               <p className="text-sm mt-2">
-                {user?.role === "admin" ? "Administrator" : user?.role === "designer" ? "Designer" : "Customer"}
+                {currentUser?.role === "admin" ? "Administrator" : currentUser?.role === "designer" ? "Designer" : "Customer"}
               </p>
             </div>
           </CardContent>
@@ -188,7 +188,7 @@ const Profile = () => {
             </TabsContent>
           </Tabs>
           
-          {user?.role === "designer" && (
+          {currentUser?.role === "designer" && (
             <Card>
               <CardHeader>
                 <CardTitle>Designer Settings</CardTitle>
