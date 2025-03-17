@@ -8,10 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "@/contexts/UserContext";
 import { toast } from "sonner";
+import { useDesign } from "@/contexts/DesignContext";
+import { Download } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
   const { currentUser, updateUser, isAuthenticated, logout } = useUser();
+  const { recentDesigns } = useDesign();
   const [name, setName] = useState(currentUser?.name || "");
   const [email, setEmail] = useState(currentUser?.email || "");
   const [bio, setBio] = useState(currentUser?.bio || "");
@@ -68,6 +71,41 @@ const Profile = () => {
     toast.success("Logged out successfully");
   };
 
+  const handleDownloadDesign = (design: any) => {
+    try {
+      // Create a JSON string from the design object
+      const designJson = JSON.stringify(design, null, 2);
+      
+      // Create a blob from the JSON string
+      const blob = new Blob([designJson], { type: "application/json" });
+      
+      // Create a URL for the blob
+      const url = URL.createObjectURL(blob);
+      
+      // Create a temporary link element
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${design.name || "design"}-${design.id}.json`;
+      
+      // Append the link to the body
+      document.body.appendChild(link);
+      
+      // Click the link to trigger the download
+      link.click();
+      
+      // Remove the link from the body
+      document.body.removeChild(link);
+      
+      // Release the URL object
+      URL.revokeObjectURL(url);
+      
+      toast.success(`Design "${design.name}" downloaded successfully`);
+    } catch (error) {
+      console.error("Error downloading design:", error);
+      toast.error("Failed to download design");
+    }
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-8">My Profile</h1>
@@ -99,9 +137,10 @@ const Profile = () => {
         
         <div className="space-y-6">
           <Tabs defaultValue="profile">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="profile">Profile Settings</TabsTrigger>
               <TabsTrigger value="password">Password</TabsTrigger>
+              <TabsTrigger value="designs">My Designs</TabsTrigger>
             </TabsList>
             
             <TabsContent value="profile">
@@ -184,6 +223,54 @@ const Profile = () => {
                     </Button>
                   </CardFooter>
                 </form>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="designs">
+              <Card>
+                <CardHeader>
+                  <CardTitle>My Designs</CardTitle>
+                  <CardDescription>
+                    View and download your designs
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {recentDesigns && recentDesigns.length > 0 ? (
+                    <div className="space-y-4">
+                      {recentDesigns.map((design) => (
+                        <div key={design.id} className="flex items-center justify-between p-4 border rounded-md">
+                          <div>
+                            <h3 className="font-medium">{design.name || "Untitled Design"}</h3>
+                            <p className="text-sm text-gray-500">
+                              Created: {design.createdAt ? new Date(design.createdAt).toLocaleDateString() : "Unknown"}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={() => navigate(`/editor/${design.id}`)}>
+                              Edit
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleDownloadDesign(design)}
+                              className="flex items-center gap-1"
+                            >
+                              <Download size={16} />
+                              Download
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500 mb-4">You don't have any designs yet</p>
+                      <Button onClick={() => navigate("/editor")}>
+                        Create a Design
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
