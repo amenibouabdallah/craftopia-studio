@@ -1,6 +1,7 @@
+
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-export type ElementType = "text" | "shape" | "image";
+export type ElementType = "text" | "shape" | "image" | "line";
 
 export interface DesignElement {
   id: string;
@@ -17,8 +18,9 @@ export interface DesignElement {
   fontFamily?: string;
   stroke?: string;
   strokeWidth?: number;
-  shapeType?: "rect" | "circle" | "ellipse" | "line" | "triangle";
+  shapeType?: "rect" | "circle" | "ellipse" | "line" | "triangle" | "pentagon" | "hexagon" | "star";
   align?: "left" | "center" | "right";
+  points?: number[]; // For line drawings
 }
 
 export interface Design {
