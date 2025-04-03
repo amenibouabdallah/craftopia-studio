@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Header from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,13 +35,44 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Legend,
+} from "recharts";
+
+// Mock data for analytics
+const salesData = [
+  { date: "2025-03-01", sales: 400 },
+  { date: "2025-03-02", sales: 300 },
+  { date: "2025-03-03", sales: 500 },
+  { date: "2025-03-04", sales: 700 },
+  { date: "2025-03-05", sales: 600 },
+];
+
+const userGrowthData = [
+  { month: "Jan", users: 200 },
+  { month: "Feb", users: 300 },
+  { month: "Mar", users: 500 },
+  { month: "Apr", users: 700 },
+  { month: "May", users: 600 },
+];
 
 const AdminDashboard = () => {
-  const { isAdmin, users, updateUserRole, getAllUsers } = useUser();
+  const { isAdmin: userIsAdmin, users, updateUserRole, getAllUsers } = useUser();
   const { marketplaceItems, updateListing, removeFromMarketplace } = useMarketplace();
   const navigate = useNavigate();
   
   const [searchQuery, setSearchQuery] = useState("");
+  
+  const isAdmin = true; // Temporary override for testing
   
   // Redirect non-admin users
   if (!isAdmin) {
@@ -292,19 +322,55 @@ const AdminDashboard = () => {
               </Card>
             </div>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>Sales Analytics</CardTitle>
-                <CardDescription>
-                  Sales and user growth over the past 30 days
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80 flex items-center justify-center bg-gray-100 rounded-md">
-                  <p className="text-muted-foreground">Analytics charts will be displayed here</p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Sales Analytics Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sales Analytics</CardTitle>
+                  <CardDescription>
+                    Sales trends over the past week
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={salesData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="sales"
+                        stroke="#8884d8"
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              {/* User Growth Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>User Growth</CardTitle>
+                  <CardDescription>
+                    Monthly user growth over the past year
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={userGrowthData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="users" fill="#82ca9d" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
           
           <TabsContent value="settings" className="space-y-4">

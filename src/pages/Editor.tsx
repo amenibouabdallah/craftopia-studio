@@ -1,8 +1,8 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
+import "@/styles/Editor.css";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDesign } from "@/contexts/DesignContext";
 import { Stage, Layer, Rect, Text, Transformer, Image, Line, Circle, Star, RegularPolygon } from "react-konva";
@@ -11,6 +11,7 @@ import {
   Type, 
   Square, 
   Image as ImageIcon, 
+  FileImage ,
   Palette, 
   Layers, 
   Download, 
@@ -31,6 +32,8 @@ import {
   MousePointer
 } from "lucide-react";
 import { toast } from "sonner";
+import React from "react";
+import { searchUnsplashImages } from "@/utils/unsplash";
 
 // Helper function to create a new design
 const createEmptyDesign = (width: number, height: number, name: string = "Untitled Design") => {
@@ -97,6 +100,10 @@ const Editor = () => {
   const [drawingMode, setDrawingMode] = useState(false);
   const [lines, setLines] = useState<any[]>([]);
   const [currentLine, setCurrentLine] = useState<any>(null);
+  const [unsplashModalOpen, setUnsplashModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [unsplashImages, setUnsplashImages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   
   // Load design
   useEffect(() => {
@@ -873,6 +880,51 @@ const Editor = () => {
     }
   };
 
+  const handleUnsplashSearch = async () => {
+    setLoading(true);
+    try {
+      const images = await searchUnsplashImages(searchQuery);
+      setUnsplashImages(images);
+    } catch (error) {
+      console.error("Error fetching Unsplash images:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImportUnsplashImage = (imageUrl: string) => {
+    if (!currentDesign) return;
+
+    const img = new window.Image();
+    img.src = imageUrl;
+
+    img.onload = () => {
+      const aspectRatio = img.width / img.height;
+      const maxWidth = currentDesign.width * 0.5;
+      const maxHeight = currentDesign.height * 0.5;
+
+      let width = maxWidth;
+      let height = width / aspectRatio;
+
+      if (height > maxHeight) {
+        height = maxHeight;
+        width = height * aspectRatio;
+      }
+
+      addElement({
+        type: "image",
+        x: currentDesign.width / 2,
+        y: currentDesign.height / 2,
+        width,
+        height,
+        rotation: 0,
+        src: imageUrl,
+      });
+
+      setUnsplashModalOpen(false);
+    };
+  };
+
   if (!currentDesign) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -941,6 +993,10 @@ const Editor = () => {
               <div><ImageIcon size={20} /></div>
             </Button>
           </label>
+          
+          <Button variant="ghost" size="icon" onClick={() => setUnsplashModalOpen(true)}>
+            <div><ImageIcon size={20} /> </div>
+          </Button>
           
           <Button variant="ghost" size="icon">
             <Palette size={20} />
@@ -1147,6 +1203,36 @@ const Editor = () => {
           </Tabs>
         </div>
       </div>
+
+      {unsplashModalOpen && (
+        <div className="unsplash-modal">
+          <div className="modal-content">
+            <h3>Search Unsplash Images</h3>
+            <input
+              type="text"
+              placeholder="Search for images..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <Button onClick={handleUnsplashSearch} disabled={loading}>
+              {loading ? "Searching..." : "Search"}
+            </Button>
+
+            <div className="image-grid">
+              {unsplashImages.map((image) => (
+                <div key={image.id} className="image-item">
+                  <img src={image.urls.thumb} alt={image.alt_description} />
+                  <Button onClick={() => handleImportUnsplashImage(image.urls.full)}>
+                    Import
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            <Button onClick={() => setUnsplashModalOpen(false)}>Close</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
