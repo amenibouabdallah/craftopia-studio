@@ -31,11 +31,11 @@ const Header = () => {
       <div className="flex items-center justify-between max-w-screen-2xl mx-auto">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center">
-            <h1 className="text-xl font-bold text-brand-purple flex items-center">
-              <span className="bg-brand-purple text-white p-1 rounded mr-2">
+            <h1 className="text-xl font-bold text-black flex items-center">
+              <h1 className="bg-black text-white !text-xl p-1 px-2 rounded mr-0">
                 D
-              </span>
-              DesignHub
+              </h1>
+              esignih
             </h1>
           </Link>
 
